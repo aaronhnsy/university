@@ -1,8 +1,23 @@
 namespace Lab;
 
-public static class LabThree {
-    private static void Rounding() {
-        Console.WriteLine("Enter a number: ");
+public static class LabThree
+{
+    public static void TestLabThree()
+    {
+        Console.WriteLine("Testing Lab Three");
+        Task320();
+        Task333();
+        Task334();
+        Task335();
+        Task340();
+        Console.WriteLine("End of Lab Three");
+    }
+
+    private static void Rounding()
+    {
+        Console.WriteLine("Task 3.2.1: Rounding");
+
+        Console.WriteLine("Enter a decimal number: ");
         if (double.TryParse(Console.ReadLine(), out var number)) {
             Console.WriteLine("How many decimal places should it be rounded too: ");
             Console.WriteLine(int.TryParse(Console.ReadLine(), out var decimalPlaces)
@@ -14,31 +29,48 @@ public static class LabThree {
         }
     }
 
-    private static void CompareStrings() {
+    private static void CompareStrings()
+    {
+        Console.WriteLine("Task 3.2.1: String Comparison");
+
         Console.WriteLine("Enter string 1: ");
         var stringOne = Console.ReadLine();
         Console.WriteLine("Enter string 2: ");
         var stringTwo = Console.ReadLine();
-        Console.WriteLine(string.Equals(stringOne, stringTwo, StringComparison.CurrentCultureIgnoreCase)
-            ? "The two strings are equal."
-            : "The two strings are not equal."
+        Console.WriteLine(
+            string.Equals(stringOne, stringTwo, StringComparison.CurrentCultureIgnoreCase)
+                ? "The two strings are equal."
+                : "The two strings are not equal."
         );
     }
 
-    private static bool IsEven(int number) {
+    private static void Task320()
+    {
+        Console.WriteLine("Task 3.2.0: Built-in Functions");
+        Rounding();
+        CompareStrings();
+    }
+
+    private static bool IsEven(int number)
+    {
         return number % 2 == 0;
     }
 
-    private static bool IsLeapYear(int year) {
+    private static bool IsLeapYear(int year)
+    {
         return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
     }
 
-    private static void DaysInMonth() {
+    private static void Task333()
+    {
+        Console.WriteLine("Task 3.3.3: Days in a Month");
+
         Console.WriteLine("Enter a year: ");
         if (!int.TryParse(Console.ReadLine(), out var year)) {
             Console.WriteLine("That is not a valid year.");
             return;
         }
+
         var isLeapYear = IsLeapYear(year);
         Console.WriteLine("Enter a month: ");
         var month = Console.ReadLine();
@@ -46,6 +78,7 @@ public static class LabThree {
             Console.WriteLine("That is not a valid month.");
             return;
         }
+
         switch (month.ToLower()) {
             case "january":
                 Console.WriteLine("There are 31 days in January.");
@@ -88,26 +121,90 @@ public static class LabThree {
                 break;
         }
     }
-    
-    private static int Factorial(int number) {
+
+    private static int Factorial(int number)
+    {
         if (number == 0) {
             return 1;
         }
+
         return number * Factorial(number - 1);
     }
 
-    private static void Recursive() {
+    private static void Task334()
+    {
+        Console.WriteLine("Task 3.3.4: Factorial");
+
         Console.WriteLine("Enter a number: ");
         if (!int.TryParse(Console.ReadLine(), out var number)) {
             Console.WriteLine("That is not a valid number.");
             return;
         }
+
         Console.WriteLine($"The factorial of {number} is {Factorial(number)}.");
     }
-    public static void TestLabThree() {
-        // Rounding();
-        // CompareStrings();
-        // DaysInMonth();
-        Recursive();
+
+    private static void PassingByValueAndReference(int numberOne, ref int numberTwo)
+    {
+        numberOne += 1;
+        numberTwo += 1;
+    }
+
+    private static void Task335()
+    {
+        Console.WriteLine("Task 3.3.5: Passing Parameters by Value and by Reference");
+
+        int numberOne = 1;
+        int numberTwo = 1;
+        PassingByValueAndReference(numberOne, ref numberTwo);
+        Console.WriteLine($"Number One: {numberOne}");
+        Console.WriteLine($"Number Two: {numberTwo}");
+    }
+
+    private static void FunctionOne()
+    {
+        Console.WriteLine("This is function one.");
+    }
+
+    private static void FunctionTwo()
+    {
+        Console.WriteLine("This is function two.");
+    }
+
+    private static void FunctionThree()
+    {
+        Console.WriteLine("This is function three.");
+    }
+
+    private static void Task340()
+    {
+        Console.WriteLine("Task 3.4.0: A Simple Menu");
+
+        Console.WriteLine("\tWelcome to the menu!");
+        Console.WriteLine("1. Function 1");
+        Console.WriteLine("2. Function 2");
+        Console.WriteLine("3. Function 3");
+        Console.WriteLine("4. Exit");
+
+        Console.WriteLine("Please choose an option: ");
+        var option = Console.ReadLine();
+
+        switch (option) {
+            case "1":
+                FunctionOne();
+                break;
+            case "2":
+                FunctionTwo();
+                break;
+            case "3":
+                FunctionThree();
+                break;
+            case "4":
+                Console.WriteLine("Goodbye!");
+                break;
+            default:
+                Console.WriteLine("That is not a valid option.");
+                break;
+        }
     }
 }

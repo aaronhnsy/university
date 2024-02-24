@@ -1,16 +1,28 @@
 namespace Lab;
 
-public static class LabTwo {
-    private static void VariablesAndExpressions() {
-        Console.WriteLine("Task 2.3: Variables and Expressions");
+public static class LabTwo
+{
+    public static void TestLabTwo()
+    {
+        Console.WriteLine("Testing Lab Two");
+        Task230();
+        Task241();
+        Task242();
+        Task243();
+        Console.WriteLine("End of Lab Two");
+    }
 
-        int a = 5;
-        double b = 2.3;
-        double c = 1.2;
-        int p = 3;
-        string f = "a student!";
-        string name = "aaron";
-        double pi = 3.142;
+    private static void Task230()
+    {
+        Console.WriteLine("Task 2.3.0: Variables and Expressions");
+
+        const int a = 5;
+        const double b = 2.3;
+        const double c = 1.2;
+        const int p = 3;
+        const string f = "a student!";
+        const string name = "aaron";
+        const double pi = 3.142;
 
         long x;
         double y;
@@ -44,15 +56,16 @@ public static class LabTwo {
         // Console.WriteLine(x); - not valid - the equation is not valid code.
     }
 
-    private static void RelationalOperators() {
+    private static void Task241()
+    {
         Console.WriteLine("Task 2.4.1: Relational Operators");
-        
-        int m = 100;
-        int n = 204;
-        double o = -23.1;
-        bool p = true;
-        bool q = false;
-        int r = -204;
+
+        const int m = 100;
+        const int n = 204;
+        const double o = -23.1;
+        const bool p = true;
+        const bool q = false;
+        const int r = -204;
 
         if (m < n) {
             Console.WriteLine("(m < n) == True");
@@ -83,12 +96,13 @@ public static class LabTwo {
         }
     }
 
-    private static void IfStatements() {
+    private static void Task242()
+    {
         Console.WriteLine("Task 2.4.2: If Statements");
 
         Console.WriteLine("Enter your ID number: ");
         string? idString = Console.ReadLine();
-        if (Int32.TryParse(idString, out int id)) {
+        if (int.TryParse(idString, out int id)) {
             if (id == 20) {
                 Console.WriteLine("Id number starts with 20");
             }
@@ -107,12 +121,13 @@ public static class LabTwo {
         }
     }
 
-    private static void SelectStatements() {
+    private static void Task243()
+    {
         Console.WriteLine("Task 2.4.3: Select Statements");
 
         Console.WriteLine("Enter your ID number: ");
         string? idString = Console.ReadLine();
-        if (Int32.TryParse(idString, out int id)) {
+        if (int.TryParse(idString, out int id)) {
             switch (id) {
                 case < 10:
                     Console.WriteLine("Id number is less than 10");
@@ -137,13 +152,5 @@ public static class LabTwo {
         else {
             Console.WriteLine("That wasn't a valid number.");
         }
-    }
-
-    public static void TestLabTwo() {
-        Console.WriteLine("Testing Lab Two");
-        VariablesAndExpressions();
-        RelationalOperators();
-        IfStatements();
-        SelectStatements();
     }
 }
