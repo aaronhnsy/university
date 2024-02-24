@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Lab;
+namespace Labs;
 
 public static class LabFour
 {

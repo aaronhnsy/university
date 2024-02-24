@@ -1,4 +1,4 @@
-﻿namespace Lab;
+﻿namespace Labs;
 
 internal static class Program
 {
