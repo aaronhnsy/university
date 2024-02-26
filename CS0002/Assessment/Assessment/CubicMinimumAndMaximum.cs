@@ -16,7 +16,7 @@ public static class CubicMinimumAndMaximum
          * Use my IO helper class method to get a number input from the user;
          * - [1] It throws an error upon invalid input which we can use to display a message for the user.
          * - [2] If an error is thrown, we continue to the next loop which asks them to input something again.
-         * - [3] If an error isn't thrown, they input a valid number and we can return it to the main function.
+         * - [3] If an error isn't thrown, their input was a valid number and we can return it to the main function.
          */
         while (true) {
             double x;
@@ -34,15 +34,6 @@ public static class CubicMinimumAndMaximum
         }
     }
 
-    private static double CalculateDiscriminant(double a, double b, double c)
-    {
-        /*
-         * Calculate the discriminant;
-         * (2b)^2 - (4 * (3a) * c)
-         */
-        return Math.Pow((2 * b), 2) - (4 * (3 * a) * c);
-    }
-
     private static double CalculateRoot(double a, double b, double discriminant, RootSign sign)
     {
         /*
@@ -54,16 +45,17 @@ public static class CubicMinimumAndMaximum
          *   it would be wasteful to have to recalculate it again for the two times that this
          *   function is called.
          *
-         * -2b +- sqrt((2b)^2 - (4 * (3a) * c))
-         * ------------------------------------
-         *                2 * 3a
+         *     -2b +- sqrt((2b)^2 - (4 * (3a) * c))
+         * x = ------------------------------------
+         *                    2 * 3a
          */
 
+        //  [1]
         var x = -(2 * b);
-        var y = Math.Sqrt(discriminant);  // [1]
+        var y = Math.Sqrt(discriminant);  // [2]
         var z = (2 * 3 * a);
 
-        return sign switch  // [2]
+        return sign switch  // [1]
         {
             RootSign.Positive => (x + y) / z,  // notice the (x PLUS y) here
             RootSign.Negative => (x - y) / z,  // v.s the (x MINUS y) here
@@ -71,24 +63,6 @@ public static class CubicMinimumAndMaximum
             // technically, the default case shouldn't ever happen as we are the
             // only ones calling this function, but it never hurts to be sure.
         };
-    }
-
-    private static double CalculateSecondDerivative(double a, double b, double root)
-    {
-        /*
-         * Calculate the 2nd derivative;
-         * f''(x) = 6ax + 2b
-         */
-        return (6 * a * root) + (2 * b);
-    }
-
-    private static double EvaluateFunction(double a, double b, double c, double d, double x)
-    {
-        /*
-         * Evaluate the function using the root values of x.
-         * f(x) = a(x^3) + b(x^2) + cx + d
-         */
-        return (a * Math.Pow(x, 3)) + (b * Math.Pow(x, 2)) + (c * x) + d;
     }
 
     private static void EvaluateMinimumOrMaximum(
@@ -108,13 +82,17 @@ public static class CubicMinimumAndMaximum
         /*
          * We then calculate the 2nd derivative to determine whether or not this root is the
          * minimum or maximum of the cubic function.
+         *
+         * f''(x) = (6 * a * x) + (2 * b);
          */
-        var secondDerivative = CalculateSecondDerivative(a, b, root);
+        var secondDerivative = (6 * a * root) + (2 * b);
         /*
          * Finally, we can evaluate the function using this root to find the result of the
          * cubic function
+         *
+         * f(x) = a(x^3) + b(x^2) + cx + d
          */
-        var result = EvaluateFunction(a, b, c, d, root);
+        var result = (a * Math.Pow(root, 3)) + (b * Math.Pow(root, 2)) + (c * root) + d;
 
         /*
          * The 2nd derivative determines whether the root is the minimum or maximum of the cubic
@@ -126,25 +104,23 @@ public static class CubicMinimumAndMaximum
         switch (secondDerivative) {
             case > 0:
                 IO.WriteLine("Minimum: ", colour: ConsoleColor.Magenta);
-                IO.WriteLine(
-                    $"x = {root:F}\nf(x) = {result:F}",
-                    colour: ConsoleColor.Green
-                );
                 break;
             case < 0:
                 IO.WriteLine("Maximum: ", colour: ConsoleColor.Magenta);
-                IO.WriteLine(
-                    $"x = {root:F}\nf(x) = {result:F}",
-                    colour: ConsoleColor.Green
-                );
                 break;
             default:
                 IO.WriteLine(
                     "The function might have an inflection point",
                     colour: ConsoleColor.Red
                 );
-                break;
+                // we return here as we dont want the proceeding code to run as this function
+                // does not actually have a local minimum or maximum.
+                return;
         }
+        IO.WriteLine(
+            $"x = {root:F}\nf(x) = {result:F}",
+            colour: ConsoleColor.Green
+        );
     }
 
     public static void Start()
@@ -175,11 +151,13 @@ public static class CubicMinimumAndMaximum
         /*
          * Predetermine the discriminant of the x (root) of the function.
          * - This is used to check if the function will actually have a minimum or maximum.
+         *
+         * discriminant = (2b)^2 - (4 * (3a) * c)
          */
-        var discriminant = CalculateDiscriminant(a, b, c);
+        var discriminant = Math.Pow((2 * b), 2) - (4 * (3 * a) * c);
         if (discriminant < 0) {
             IO.WriteLine(
-                "\nNo Minimum and Maximum can be found for a function with those coefficients.\n",
+                "\nNo Minimum and Maximum can be found for a cubic function with those coefficients.\n",
                 colour: ConsoleColor.Red
             );
             return;
