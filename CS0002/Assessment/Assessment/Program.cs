@@ -4,77 +4,80 @@ internal static class Program
 {
     private static void Main(string[] _)
     {
-        // This flag controls the main loop of the program, at any point during execution we
-        // can set this to false and continue to the next loop to exit the program.
+        /*
+         * This boolean flag value controls the main loop of the program. At any point
+         * during execution we can set it to 'false' which will end the program after
+         * the current loop is over. We could also choose to use 'continue' or 'break'
+         * to end the current loop immediately.
+         */
         var active = true;
 
         while (active) {
-            // Print the programs main menu using my custom IO (Input/Output) helper class to
-            // colourise the output.
-            IO.WriteLine("Main Menu:", colour: ConsoleColor.Green);
-            IO.Write("1. ", colour: ConsoleColor.Blue);
-            IO.Write("Find Cubic Function Minimum and Maximum\n");
-            IO.Write("2. ", colour: ConsoleColor.Blue);
-            IO.Write("Stock Analysis\n");
-            IO.Write("3. ", colour: ConsoleColor.Blue);
-            IO.Write("Exit\n");
+            // print the main menu text using the Output helper class to colourise the
+            // different elements.
+            Output.GreenNL("Main Menu:");
+            Output.Blue("1. ");
+            Output.White("Find Cubic Function's Minimum and Maximum\n");
+            Output.Blue("2. ");
+            Output.White("Stock Analysis\n");
+            Output.Blue("3. ");
+            Output.White("Exit\n");
 
             /*
-             * Use my IO helper class method to get an sbyte input from the user;
-             * - [1] The type returned is specified in the angle brackets (<sbyte>).
-             *   - We use an sbyte because the options only range from 1-3, it would be wasteful to
-             *     use a type that allows for a higher range of inputs.
-             * - [2] The first argument is the prompt to display to the user.
-             * - [3] The second argument is the error message to display if the input is invalid.
-             * - [4] If the input is invalid, an ArgumentException is thrown and caught in the catch block.
-             *   - [5] The error message is printed to the console, in red.
-             *   - [6] The loop continues to the next iteration, which displays the main menu again.
+             * Use one of the Input helper class methods to get an input from the user;
+             * - The type returned is specified in the angle brackets. (<byte>)
+             *   - We're using a byte type here because it only stores numbers ranging
+             *     from 0 to 255, which uses the least amount of memory. Our main menu
+             *     only has 3 options so this is the most efficient type.
+             * - The first parameter is the prompt telling the user what to input.
+             * - The second parameter is the variable used to store their parsed input.
+             * - This method returns true or false depending on the if the users input
+             *   was able to be parsed into the type specified in the angle brackets.
+             * - Using that return value, we can tell the user their input was invalid
+             *   and continue to the next loop which will ask them to input something
+             *   else.
              */
-            sbyte input;
-            try {
-                input = IO.GetNumberInput<sbyte>(  // [1]
-                    prompt: "Enter your choice: ",  // [2]
-                    errorMessage: "That is not a valid number."  // [3]
-                );
-            }
-            catch (ArgumentException e) {  // [4]
-                IO.WriteLine($"{e.Message}\n", colour: ConsoleColor.Red);  // [5]
-                continue; // [6]
+            if (Input.Get<byte>("Enter your choice: ", out var choice) == false) {
+                Output.RedNL("That is not a valid number.\n");
+                continue;
             }
 
             /*
-             * The switch statement is used to decide which actions to perform based on the
-             * users input;
-             * 1. If the user types '1', we call the Calculate method from the CubicMinMax class.
-             * 2. If the user types '2', we call the Menu method from the StockAnalysis class.
-             * 3. If the user types '3', we set the active flag to false which will cause the main
-             *    while loop's condition to be false, it turn, causing the loop to stop and the
-             *    program to exit.
-             * If the user didn't pick a valid option (1, 2, or 3), we tell them so and just continue
-             * as normal because the loop will restart after this switch block ends, allowing them
-             * to try again.
+             * The switch statement is used to decide which actions to perform based on
+             * the users input;
+             * - 1: We call 'CubicMinimumAndMaximum.Start()' which starts the cubic
+             *      function local minimum and maximum part of this program.
+             * - 2: We call `StockAnalysis.Menu()` which starts the menu for the stock
+             *      analysis part of this program.
+             * - 3: We set the main loops boolean flag to false which will end the
+             *      program after the current loop has finished executing.
+             * - If the user didn't select a valid choice, we tell them so and continue
+             *   as normal because the main loop will restart after this, allowing them
+             *   to pick another option.
+             * - The extraneous `Console.WriteLine()`'s are to insert new lines to
+             *   format everything nicely.
              */
-            switch (input) {
+            switch (choice) {
                 case 1:
+                    Console.WriteLine();
                     CubicMinimumAndMaximum.Start();
+                    Console.WriteLine();
                     break;
                 case 2:
+                    Console.WriteLine();
                     StockAnalysis.Menu();
+                    Console.WriteLine();
                     break;
                 case 3:
                     active = false;
                     break;
                 default:
-                    IO.WriteLine(
-                        "That is not a valid choice.\n",
-                        colour: ConsoleColor.Red
-                    );
+                    Output.RedNL("That is not a valid choice.\n");
                     break;
             }
         }
-
-        // If the while loop has finished, we can assume the user chose to exit the program so we
-        // print a goodbye message to the console.
-        Console.WriteLine("Goodbye!");
+        // If the program main loop has finished, we can assume the user chose to exit
+        // the program so we print a goodbye message to the console.
+        Output.WhiteNL("Goodbye!");
     }
 }

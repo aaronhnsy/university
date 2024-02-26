@@ -1,6 +1,4 @@
-﻿// ReSharper disable ArrangeRedundantParentheses
-
-namespace Assessment;
+﻿namespace Assessment;
 
 public enum RootSign
 {
@@ -12,62 +10,43 @@ public static class CubicMinimumAndMaximum
 {
     private static double GetCoefficient(string name)
     {
-        /*
-         * Use my IO helper class method to get a number input from the user;
-         * - [1] It throws an error upon invalid input which we can use to display a message for the user.
-         * - [2] If an error is thrown, we continue to the next loop which asks them to input something again.
-         * - [3] If an error isn't thrown, their input was a valid number and we can return it to the main function.
-         */
-        while (true) {
-            double x;
-            try {
-                x = IO.GetNumberInput<double>(
-                    prompt: $"Value '{name}': ",
-                    errorMessage: "That is not a valid number."
-                );
-            }
-            catch (ArgumentException e) {
-                IO.WriteLine($"{e.Message}\n", colour: ConsoleColor.Red);  // [1]
-                continue; // [2]
-            }
-            return x;  // [3]
+        double coefficient;
+        while (Input.Get($"Value '{name}': ", out coefficient) == false) {
+            Output.RedNL("That is not a valid number.");
         }
+        return coefficient;
     }
 
     private static double CalculateRoot(double a, double b, double discriminant, RootSign sign)
     {
         /*
          * Calculate the positive or negative root;
-         * - [1] Instead of writing out the entire equation for both the positive and negative
+         * - Instead of writing out the entire equation for both the positive and negative
          *   root, we can assign the main parts to variables and simply switch the signs
          *   around depending on which root we are finding.
-         * - [2] We can reuse the discriminant that we had predetermined in the main function as
-         *   it would be wasteful to have to recalculate it again for the two times that this
-         *   function is called.
+         * - We can reuse the discriminant that we had predetermined in the main function
+         *   as it would be wasteful to have to recalculate it again for the two times
+         *   that this function is called.
          *
          *     -2b +- sqrt((2b)^2 - (4 * (3a) * c))
          * x = ------------------------------------
          *                    2 * 3a
          */
-
-        //  [1]
         var x = -(2 * b);
-        var y = Math.Sqrt(discriminant);  // [2]
+        var y = Math.Sqrt(discriminant);
         var z = (2 * 3 * a);
-
-        return sign switch  // [1]
+        return sign switch
         {
-            RootSign.Positive => (x + y) / z,  // notice the (x PLUS y) here
-            RootSign.Negative => (x - y) / z,  // v.s the (x MINUS y) here
+            RootSign.Positive => (x + y) / z, // notice the (x PLUS y) here
+            RootSign.Negative => (x - y) / z, // v.s the (x MINUS y) here
             _ => throw new ArgumentOutOfRangeException(nameof(sign), sign, "That isn't a valid sign type.")
-            // technically, the default case shouldn't ever happen as we are the
-            // only ones calling this function, but it never hurts to be sure.
+            // technically, the default case shouldn't ever happen as we are the only
+            // ones calling this function, but it never hurts to be sure.
         };
     }
 
     private static void EvaluateMinimumOrMaximum(
-        double a, double b, double c, double d,
-        double discriminant, RootSign sign
+        double a, double b, double c, double d, double discriminant, RootSign sign
     )
     {
         /*
@@ -103,33 +82,23 @@ public static class CubicMinimumAndMaximum
          */
         switch (secondDerivative) {
             case > 0:
-                IO.WriteLine("Minimum: ", colour: ConsoleColor.Magenta);
+                Output.PurpleNL("Minimum: ");
+                Output.GreenNL($"x = {root:F}\nf(x) = {result:F}");
                 break;
             case < 0:
-                IO.WriteLine("Maximum: ", colour: ConsoleColor.Magenta);
+                Output.PurpleNL("Maximum: ");
+                Output.GreenNL($"x = {root:F}\nf(x) = {result:F}");
                 break;
             default:
-                IO.WriteLine(
-                    "The function might have an inflection point",
-                    colour: ConsoleColor.Red
-                );
-                // we return here as we dont want the proceeding code to run as this function
-                // does not actually have a local minimum or maximum.
-                return;
+                Output.RedNL("The function might have an inflection point");
+                break;
         }
-        IO.WriteLine(
-            $"x = {root:F}\nf(x) = {result:F}",
-            colour: ConsoleColor.Green
-        );
     }
 
     public static void Start()
     {
         // let the user know that they will be entering their cubic function's coefficients.
-        IO.WriteLine(
-            "\nPlease enter your cubic function's coefficients:",
-            colour: ConsoleColor.Blue
-        );
+        Output.BlueNL("Please enter your cubic function's coefficients:");
 
         /*
          * Use the helper function to read the coefficients from the users input:
@@ -138,10 +107,7 @@ public static class CubicMinimumAndMaximum
          */
         var a = GetCoefficient("a");
         while (a == 0) {
-            IO.WriteLine(
-                "The value of 'a' cannot be zero.",
-                colour: ConsoleColor.Red
-            );
+            Output.RedNL("The value of 'a' cannot be zero.");
             a = GetCoefficient("a");
         }
         var b = GetCoefficient("b");
@@ -156,10 +122,7 @@ public static class CubicMinimumAndMaximum
          */
         var discriminant = Math.Pow((2 * b), 2) - (4 * (3 * a) * c);
         if (discriminant < 0) {
-            IO.WriteLine(
-                "\nNo Minimum and Maximum can be found for a cubic function with those coefficients.\n",
-                colour: ConsoleColor.Red
-            );
+            Output.RedNL("\nNo Minimum and Maximum can be found for a cubic function with those coefficients.");
             return;
         }
 
@@ -168,7 +131,5 @@ public static class CubicMinimumAndMaximum
         // find the minimum and maximum for the positive and negative root of the function.
         EvaluateMinimumOrMaximum(a, b, c, d, discriminant, RootSign.Positive);
         EvaluateMinimumOrMaximum(a, b, c, d, discriminant, RootSign.Negative);
-        // newline for formatting reasons
-        Console.WriteLine();
     }
 }
