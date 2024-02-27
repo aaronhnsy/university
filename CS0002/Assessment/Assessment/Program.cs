@@ -37,7 +37,7 @@ internal static class Program
              *   and continue to the next loop which will ask them to input something
              *   else.
              */
-            if (Input.Get<byte>("Enter your choice: ", out var choice) == false) {
+            if (!Input.Get<byte>("Enter your choice: ", out var choice)) {
                 Output.RedNL("That is not a valid number.\n");
                 continue;
             }
@@ -45,7 +45,7 @@ internal static class Program
             /*
              * The switch statement is used to decide which actions to perform based on
              * the users input;
-             * - 1: We call 'CubicMinimumAndMaximum.Start()' which starts the cubic
+             * - 1: We call 'FindCubicFunctionMinAndMax.Start()' which starts the cubic
              *      function local minimum and maximum part of this program.
              * - 2: We call `StockAnalysis.Menu()` which starts the menu for the stock
              *      analysis part of this program.
@@ -60,7 +60,7 @@ internal static class Program
             switch (choice) {
                 case 1:
                     Console.WriteLine();
-                    CubicMinimumAndMaximum.Start();
+                    new FindCubicFunctionMinAndMax().Start();
                     Console.WriteLine();
                     break;
                 case 2:
