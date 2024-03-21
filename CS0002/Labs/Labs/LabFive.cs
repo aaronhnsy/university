@@ -79,7 +79,7 @@ public static class LabFive
                 Console.WriteLine("That is not a valid number.");
                 continue;
             }
-            if (input == "q") {
+            if (input.ToLower() == "q") {
                 break;
             }
             if (!int.TryParse(input, out int number)) {
