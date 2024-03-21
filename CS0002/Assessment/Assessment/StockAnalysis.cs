@@ -2,7 +2,7 @@
 
 namespace Assessment;
 
-public static class StockAnalysis
+public class StockAnalysis
 {
     private readonly struct TradingDay(IReadOnlyList<string> row)
     {
@@ -14,11 +14,10 @@ public static class StockAnalysis
         public int Volume { get; } = int.Parse(row[5]);
     }
 
-    private static List<TradingDay> GetTradingDays()
+    private List<TradingDay> _days = [];
+    private void LoadTradingDays()
     {
-        var days = new List<TradingDay>();
         using var streamReader = new StreamReader("AMD.csv");
-
         while (!streamReader.EndOfStream) {
             var line = streamReader.ReadLine();
             if (string.IsNullOrWhiteSpace(line)) {
@@ -26,49 +25,47 @@ public static class StockAnalysis
                 continue;
             }
             try {
-                days.Add(new TradingDay(line.Split(",")));
+                _days.Add(new TradingDay(line.Split(",")));
             }
             catch (FormatException) {
                 Output.RedNL($"Skipped a line that contained invalid data:\n{line}");
             }
         }
-        return days;
     }
 
-    private static void AnalyseYear()
+    private void AnalyseYear()
     {
-        var days = GetTradingDays();
-        days.Sort((day1, day2) => day1.Date.CompareTo(day2.Date));
+        _days.Sort((day1, day2) => day1.Date.CompareTo(day2.Date));
 
-        var count = days.Count;
+        var count = _days.Count;
         Output.Purple("Total number of trading days: ");
         Output.Green($"{count}\n");
 
-        var firstTradingDayPrice = days.First().Open;
+        var firstTradingDayPrice = _days.First().Open;
         Output.Purple("Opening price of the first trading day: ");
         Output.Green($"{firstTradingDayPrice:F2}\n");
 
-        var lastTradingDayPrice = days.Last().Close;
+        var lastTradingDayPrice = _days.Last().Close;
         Output.Purple("Closing price of the last trading day: ");
         Output.Green($"{lastTradingDayPrice:F2}\n");
 
-        var highestTradingPrice = days.Max(day => day.High);
+        var highestTradingPrice = _days.Max(day => day.High);
         Output.Purple("Highest trading price of the year: ");
         Output.Green($"{highestTradingPrice:F2}\n");
 
-        var lowestTradingPrice = days.Min(day => day.Low);
+        var lowestTradingPrice = _days.Min(day => day.Low);
         Output.Purple("Lowest trading price of the year: ");
         Output.Green($"{lowestTradingPrice:F2}\n");
 
-        days.Sort((day1, day2) => day2.Volume.CompareTo(day1.Volume));
-        var highestVolumeDayDate = days.First().Date;
+        _days.Sort((day1, day2) => day2.Volume.CompareTo(day1.Volume));
+        var highestVolumeDayDate = _days.First().Date;
         Output.Purple("Date with the highest trading volume: ");
         Output.Green($"{highestVolumeDayDate}\n");
 
-        days.Sort((day1, day2) => day1.Date.CompareTo(day2.Date));
-        var highestVolumeDayIndex = days.FindIndex(0, day => day.Date == highestVolumeDayDate);
-        var highestVolumeDayClosingPrice = days[highestVolumeDayIndex].Close;
-        var previousDayClosingPrice = days[highestVolumeDayIndex - 1].Close;
+        _days.Sort((day1, day2) => day1.Date.CompareTo(day2.Date));
+        var highestVolumeDayIndex = _days.FindIndex(0, day => day.Date == highestVolumeDayDate);
+        var highestVolumeDayClosingPrice = _days[highestVolumeDayIndex].Close;
+        var previousDayClosingPrice = _days[highestVolumeDayIndex - 1].Close;
         var closingPriceChange = (highestVolumeDayClosingPrice - previousDayClosingPrice) / previousDayClosingPrice;
         Output.Purple("- Change in closing price from the previous trading day: ");
         Output.Green($"{closingPriceChange:P2}\n");
@@ -86,20 +83,20 @@ public static class StockAnalysis
         while (true) {
             Output.Yellow("What month would you like to analyse: ");
             var line = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(line) && Months.TryGetValue(line, out var month)) {
+            if (!string.IsNullOrWhiteSpace(line) && Months.TryGetValue(line.ToLower(), out var month)) {
                 return month;
             }
             Output.RedNL("That is not a valid month. Choices are January, May, or December.\n");
         }
     }
 
-    private static void AnalyseMonth(byte month)
+    private void AnalyseMonth(byte month)
     {
         var monthName = Months.FirstOrDefault(kvPair => kvPair.Value == month).Key;
         Output.Purple("\nSelected month: ");
         Output.Green($"{new CultureInfo("en_GB", false).TextInfo.ToTitleCase(monthName)}\n");
 
-        var days = GetTradingDays().Where(day => day.Date.Month == month).ToList();
+        var days = _days.Where(day => day.Date.Month == month).ToList();
         days.Sort((day1, day2) => day1.Date.CompareTo(day2.Date));
 
         var firstTradingDayPrice = days.First().Open;
@@ -127,14 +124,19 @@ public static class StockAnalysis
         );
     }
 
-    public static void Menu()
+    public void Menu()
     {
         /*
+         * load the trading days data from the CSV file and store it in the `_days` list as a class
+         * variable so that it can be accessed from all the other methods in this class.
+         */
+        LoadTradingDays();
+
+        /*‹
          * Most of the following code is the same as found in `Program.cs`, with a few minor changes
          * to accommodate for this being the stock analysis menu rather than the programs main menu.
          */
         var active = true;
-
         while (active) {
             Output.GreenNL("Stock Analysis:");
             Output.Blue("1. ");

@@ -65,7 +65,7 @@ internal static class Program
                     break;
                 case 2:
                     Console.WriteLine();
-                    StockAnalysis.Menu();
+                    new StockAnalysis().Menu();
                     Console.WriteLine();
                     break;
                 case 3:
@@ -76,7 +76,7 @@ internal static class Program
                     break;
             }
         }
-        // If the program main loop has finished, we can assume the user chose to exit
+        // If the programs main loop has finished, we can assume the user chose to exit
         // the program so we print a goodbye message to the console.
         Output.WhiteNL("Goodbye!");
     }
