@@ -1,9 +1,13 @@
-﻿using System.Globalization;
-
-namespace Assessment;
+﻿namespace Assessment;
 
 public class StockAnalysis
 {
+    /*
+     * Define a struct that represents a row from the CSV file, each row being one trading
+     * day. The constructor accepts a list of strings which are the values of the columns
+     * for this row. The struct is marked as readonly because once the properties are set,
+     * they do not need to be changed.
+    */
     private readonly struct TradingDay(IReadOnlyList<string> row)
     {
         public DateOnly Date { get; } = DateOnly.Parse(row[0]);
@@ -14,7 +18,18 @@ public class StockAnalysis
         public int Volume { get; } = int.Parse(row[5]);
     }
 
-    private List<TradingDay> _days = [];
+    /*
+     * Define a list to store instances of the `TradingDay` struct which will represent each
+     * trading day from the CSV file.
+    */
+    private readonly List<TradingDay> _days = [];
+
+    /*
+     * This function reads the CSV file until the end (`.EndOfStream`), converting each line
+     * into an instance of the `TradingDay` struct, and then adding that to the `_days` list.
+     * If a line is empty, null, or contains invalid data, the line is ignored and a warning
+     * is shown to the user.
+    */
     private void LoadTradingDays()
     {
         using var streamReader = new StreamReader("AMD.csv");
@@ -33,36 +48,45 @@ public class StockAnalysis
         }
     }
 
+    // analyses the trading days data for the entire year.
     private void AnalyseYear()
     {
-        _days.Sort((day1, day2) => day1.Date.CompareTo(day2.Date));
-
-        var count = _days.Count;
+        // the total number of trading days is the amount of elements in the `_days` list.
         Output.Purple("Total number of trading days: ");
-        Output.Green($"{count}\n");
+        Output.Green($"{_days.Count}\n");
 
-        var firstTradingDayPrice = _days.First().Open;
+        // make sure the days are sorted by date (ascending)
+        _days.Sort((dayOne, dayTwo) => dayOne.Date.CompareTo(dayTwo.Date));
+
+        // the first element is the first trading day. (using `:F2` to round the number to 2 decimal places).
+        var firstTradingDayOpenPrice = _days.First().Open;
         Output.Purple("Opening price of the first trading day: ");
-        Output.Green($"{firstTradingDayPrice:F2}\n");
-
-        var lastTradingDayPrice = _days.Last().Close;
+        Output.Green($"{firstTradingDayOpenPrice:F2}\n");
+        // the last element is the last trading day.
+        var lastTradingDayClosePrice = _days.Last().Close;
         Output.Purple("Closing price of the last trading day: ");
-        Output.Green($"{lastTradingDayPrice:F2}\n");
+        Output.Green($"{lastTradingDayClosePrice:F2}\n");
 
+        // use the `Max()` method to find the highest trading price of the year.
         var highestTradingPrice = _days.Max(day => day.High);
         Output.Purple("Highest trading price of the year: ");
         Output.Green($"{highestTradingPrice:F2}\n");
-
+        // use the `Min()` method to find the lowest trading price of the year.
         var lowestTradingPrice = _days.Min(day => day.Low);
         Output.Purple("Lowest trading price of the year: ");
         Output.Green($"{lowestTradingPrice:F2}\n");
 
-        _days.Sort((day1, day2) => day2.Volume.CompareTo(day1.Volume));
-        var highestVolumeDayDate = _days.First().Date;
+        // use the `MaxBy()` method to get the date of the day with the highest trading volume.
+        var highestVolumeDayDate = _days.MaxBy(day => day.Volume).Date;
         Output.Purple("Date with the highest trading volume: ");
         Output.Green($"{highestVolumeDayDate}\n");
-
-        _days.Sort((day1, day2) => day1.Date.CompareTo(day2.Date));
+        /*
+         * Find the index of the date with the highest trading volume (see above) and then get
+         * the closing price of that day, and the day before that (index - 1) to calculate the
+         * difference in closing price.
+         * We also use the `:P2` format specifier to display the number as a percentage with 2
+         * decimal places.
+         */
         var highestVolumeDayIndex = _days.FindIndex(0, day => day.Date == highestVolumeDayDate);
         var highestVolumeDayClosingPrice = _days[highestVolumeDayIndex].Close;
         var previousDayClosingPrice = _days[highestVolumeDayIndex - 1].Close;
@@ -71,56 +95,81 @@ public class StockAnalysis
         Output.Green($"{closingPriceChange:P2}\n");
     }
 
-    private static readonly Dictionary<string, byte> Months = new()
+    /*
+     * A dictionary that maps abbreviated month names to a tuple containing their number within
+     * the calendar year and their full name.
+    */
+    private static readonly Dictionary<string, (byte Number, string Name)> Months = new()
     {
-        ["january"] = 1, ["jan"] = 1,
-        ["may"] = 5,
-        ["december"] = 12, ["dec"] = 12
+        ["jan"] = (Number: 1, Name: "January"),
+        ["feb"] = (Number: 2, Name: "February"),
+        ["mar"] = (Number: 3, Name: "March"),
+        ["apr"] = (Number: 4, Name: "April"),
+        ["may"] = (Number: 5, Name: "May"),
+        ["jun"] = (Number: 6, Name: "June"),
+        ["jul"] = (Number: 7, Name: "July"),
+        ["aug"] = (Number: 8, Name: "August"),
+        ["sep"] = (Number: 9, Name: "September"),
+        ["oct"] = (Number: 10, Name: "October"),
+        ["nov"] = (Number: 11, Name: "November"),
+        ["dec"] = (Number: 12, Name: "December")
     };
 
-    private static byte ChooseMonth()
+    /*
+     * This function loops, prompting the user each time to enter a month name. If the first
+     * three characters of their input matches a key in the `Months` dictionary, the matching
+     * value is returned which contains the month number and its full name. If the input didnt
+     * match a key, an error message is shown and the loop continues.
+    */
+    private static (byte Number, string Name) ChooseMonth()
     {
         while (true) {
             Output.Yellow("What month would you like to analyse: ");
-            var line = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(line) && Months.TryGetValue(line.ToLower(), out var month)) {
+            var input = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(input) && Months.TryGetValue(input.ToLower()[..3], out var month)) {
                 return month;
             }
             Output.RedNL("That is not a valid month. Choices are January, May, or December.\n");
         }
     }
 
-    private void AnalyseMonth(byte month)
+    // analyses the trading days data for a specific month.
+    private void AnalyseMonth((byte Number, string Name) monthInfo)
     {
-        var monthName = Months.FirstOrDefault(kvPair => kvPair.Value == month).Key;
+        // tell the user their selected month.
         Output.Purple("\nSelected month: ");
-        Output.Green($"{new CultureInfo("en_GB", false).TextInfo.ToTitleCase(monthName)}\n");
+        Output.Green($"{monthInfo.Name}\n");
 
-        var days = _days.Where(day => day.Date.Month == month).ToList();
-        days.Sort((day1, day2) => day1.Date.CompareTo(day2.Date));
+        // filter the `_days` list to only include days from the selected month.
+        var monthDays = _days.Where(day => day.Date.Month == monthInfo.Number).ToList();
+        // make sure the days are sorted by date (ascending)
+        monthDays.Sort((dayOne, dayTwo) => dayOne.Date.CompareTo(dayTwo.Date));
 
-        var firstTradingDayPrice = days.First().Open;
+        // the first element is the first trading day of the month.
+        var firstTradingDayPrice = monthDays.First().Open;
         Output.Purple("Opening price: ");
         Output.Green($"{firstTradingDayPrice:F2}\n");
-
-        var lastTradingDayPrice = days.Last().Close;
+        // the last element is the last trading day of the month.
+        var lastTradingDayPrice = monthDays.Last().Close;
         Output.Purple("Closing price: ");
         Output.Green($"{lastTradingDayPrice:F2}\n");
 
-        var highestTradingPrice = days.Max(day => day.High);
+        // use the `Max()` method to find the highest trading price of the month.
+        var highestTradingPrice = monthDays.Max(day => day.High);
         Output.Purple("Highest trading price: ");
         Output.Green($"{highestTradingPrice:F2}\n");
-
-        var lowestTradingPrice = days.Min(day => day.Low);
+        // use the `Min()` method to find the lowest trading price of the month.
+        var lowestTradingPrice = monthDays.Min(day => day.Low);
         Output.Purple("Lowest trading price: ");
         Output.Green($"{lowestTradingPrice:F2}\n");
 
-        days.Sort((day1, day2) => day2.Volume.CompareTo(day1.Volume));
+        // sort the list by volume in descending order to get the days with the highest volume.
+        monthDays.Sort((dayOne, dayTwo) => dayTwo.Volume.CompareTo(dayOne.Volume));
         Output.Purple("Dates with the highest trading volume: ");
         Output.Green(
-            $"{days[0].Date} ({days[0].Volume}), " +
-            $"{days[1].Date} ({days[1].Volume}), " +
-            $"{days[2].Date} ({days[2].Volume})\n"
+            $"{monthDays[0].Date} ({monthDays[0].Volume}), " +
+            $"{monthDays[1].Date} ({monthDays[1].Volume}), " +
+            $"{monthDays[2].Date} ({monthDays[2].Volume})\n"
         );
     }
 
